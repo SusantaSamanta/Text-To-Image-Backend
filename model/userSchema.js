@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema(
             type: String,
             require: true,
             unique: true,
+            lowercase: true, 
         },
         password: {
             type: String,
@@ -20,6 +21,10 @@ const userSchema = mongoose.Schema(
             default: false,
             require: true,
         },
+        credits:{
+            type: Number,
+            default: 5,
+        }
     },
     {
         timestamps: true,
