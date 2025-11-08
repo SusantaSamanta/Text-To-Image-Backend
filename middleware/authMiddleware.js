@@ -10,7 +10,6 @@ export const authMiddleware = (req, res, next) => {
     }
     const decodedRToken = decodedJWToken(token);
     req.user = decodedRToken;
-    console.log('\ndiddle \n');
     next();
 };
 

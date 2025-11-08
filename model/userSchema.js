@@ -10,7 +10,7 @@ const userSchema = mongoose.Schema(
             type: String,
             require: true,
             unique: true,
-            lowercase: true, 
+            lowercase: true,
         },
         password: {
             type: String,
@@ -21,9 +21,17 @@ const userSchema = mongoose.Schema(
             default: false,
             require: true,
         },
-        credits:{
+        credits: {
             type: Number,
             default: 5,
+        },
+        genImagesCount: {
+            type: Number,
+            default: 0,
+        },
+        processImg: {
+            type: Boolean,
+            default: false,
         }
     },
     {

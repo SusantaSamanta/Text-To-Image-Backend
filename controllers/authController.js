@@ -32,7 +32,7 @@ export const postRegister = async (req, res) => {
     const newUser = await saveNewUser(name, email, password);
 
     const token = generateJWToken(newUser)
-    res.cookie("VISION_AUTH_TOKEN", token, { httpOnly: true, secure: false, maxAge: 7 * 60 * 60 * 1000 });
+    res.cookie("VISION_AUTH_TOKEN", token, { httpOnly: true, secure: false, maxAge: 7 * 60 * 60 * 1000 }); // 7 days 
 
     return res.status(201).json({
         success: true,
@@ -43,6 +43,7 @@ export const postRegister = async (req, res) => {
             isVerified: newUser.isVerified,
             credits: newUser.credits,
             createdAt: newUser.createdAt,
+            genImagesCount: newUser.genImagesCount,
         }
     });
 
@@ -74,6 +75,7 @@ export const postLogin = async (req, res) => {
             isVerified: isUserExist.isVerified,
             credits: isUserExist.credits,
             createdAt: isUserExist.createdAt,
+            genImagesCount: isUserExist.genImagesCount,
         }
     })
 }
@@ -90,13 +92,13 @@ export const userCreditsBalance = async (req, res) => {
 
 export const getCheck_Login = async (req, res) => {
     if (!req.user) {
-        return res.json({ success: false, message: 'User not logged in....!' });
+        return res.status(401).json({ success: false, message: 'User not logged in....!' });
     }
     const userData = await getUserById(req.user._id);
     if (!userData) {
-        return res.json({ success: false, message: 'No User Found, login again....!' });
+        return res.status(404).json({ success: false, message: 'No User Found, login again....!' });
     }
-    const { name, email, isVerified, credits, createdAt } = userData
+    const { name, email, isVerified, credits, createdAt, genImagesCount, processImg } = userData
     res.json({
         success: true,
         message: 'User logged in....!',
@@ -106,6 +108,7 @@ export const getCheck_Login = async (req, res) => {
             isVerified,
             credits,
             createdAt,
+            genImagesCount,
         }
     });
 }
@@ -113,7 +116,7 @@ export const getCheck_Login = async (req, res) => {
 export const userLogout = async (req, res) => {
     try {
         if (!req.user || !req.user._id) {
-            return res.status(401).json({ success: false, message: 'User not logged in!' });
+            return res.status(401).json({ success: false, message: 'User not logged in....!' });
         }
 
         res.clearCookie("VISION_AUTH_TOKEN", {
@@ -124,7 +127,7 @@ export const userLogout = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Logged Out Successfully!',
+            message: 'Logout Successfully....!',
             user: {
                 name: req.user.name,
                 email: req.user.email,

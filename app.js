@@ -8,6 +8,7 @@ import { authRoutes } from './routes/authRoutes.js';
 import { connectDataBase } from './config/DB-connection.js';
 import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/authMiddleware.js';
+import { generateRoutes } from './routes/ImageRoutes.js';
 connectDataBase();
 
 
@@ -29,14 +30,11 @@ app.get('/', (req, res) => {
     res.send('Server running');
 });
 
-app.get('/api/user/test', authMiddleware, (req, res) => {
-    console.log(req.url);
-    res.send('hello')
-});
 
 
 
 app.use('/api/user', authRoutes); // auth routes register, login...
+app.use('/api/image', generateRoutes);  //use for generate user image 
 
 
 const PORT = process.env.PORT || 3000;
