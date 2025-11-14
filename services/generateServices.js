@@ -62,7 +62,7 @@ const callFun = () => {
         setTimeout(() => {
             // reject('hhhh');
             resolve();
-        }, 6000);
+        }, 5000);
     })
 }
 
@@ -82,7 +82,7 @@ export const generateApiCall = async (_id, prompt) => {
         await setUserImgProcessingStatus(_id, true);
         await callFun();   /// after api call 
 
-        console.log(prompt);
+        // console.log(prompt);
 
         /*
                 const formData = new FormData();
@@ -119,6 +119,7 @@ export const generateApiCall = async (_id, prompt) => {
 
         const savedImage = await saveNewImageForUser({ _id, prompt, url: '/src/assets/1.jpg' });
         const newImage = {
+            _id: savedImage._id,
             prompt,
             imageUrl: savedImage.imageUrl,
             isPublic: savedImage.isPublic,
@@ -133,6 +134,62 @@ export const generateApiCall = async (_id, prompt) => {
         return { success: false, }
     }
 }
+
+
+
+export const loadUserChat = async (userId) => {
+    try {
+        const data = await Images.find({ generateBy: userId }).select('_id prompt imageUrl isPublic createdAt'); // Correct filtering 
+        return data;
+    } catch (error) {
+        // console.error('Error loading user chat:', error);
+        return false;
+    }
+}
+
+export const imageDelete = async ({ imageId, userId }) => {
+    try {
+        const { deletedCount } = await Images.deleteOne({ _id: imageId, generateBy: userId, }); // if it delete return 1 or 0
+        return deletedCount;
+    } catch (error) {
+        // console.error('Error loading user chat:', error);
+        return false;
+    }
+}
+
+
+export const imagePublicPrivate = async ({ imageId, userId }) => {
+    try {
+        // Find image owned by user
+        const image = await Images.findOne({ _id: imageId, generateBy: userId });
+
+        if (!image) return false;
+
+        image.isPublic = !image.isPublic;
+        await image.save();
+        const updatedImage = {
+            _id: image._id,
+            prompt: image.prompt,
+            imageUrl: image.imageUrl,
+            isPublic: image.isPublic,
+            createdAt: image.createdAt,
+        }
+        return {
+            success: true,
+            updatedImage
+        };
+
+    } catch (error) {
+        console.error('Error toggling image public/private:', error);
+        return false;
+    }
+};
+
+
+
+
+
+
 
 
 

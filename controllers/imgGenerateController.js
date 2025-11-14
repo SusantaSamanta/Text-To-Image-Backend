@@ -1,27 +1,12 @@
 
-import { response } from "express";
 import { getUserById } from "../services/authServices.js";
-import { promptWordCountVerify, generateApiCall, decreaseUserCredits } from "../services/generateServices.js";
+import { promptWordCountVerify, generateApiCall, decreaseUserCredits, loadUserChat, imageDelete, imagePublicPrivate } from "../services/generateServices.js";
 import { v2 as cloudinary } from 'cloudinary';
 import { join } from 'path'
+import { Images } from "../model/imageModel.js";
 
 
 
-
-
-export const imgProcessingController = async (req, res) => {
-    if (!req.user) {
-        return res.json({ success: false });
-    }
-    const userData = await getUserById(req.user._id);
-
-    if (!userData) {
-        return res.json({ success: false });
-    }
-
-    // console.log(req.url);
-    res.json({ success: true, processImg: userData.processImg })
-}
 
 
 
@@ -63,10 +48,66 @@ export const generateImg = async (req, res) => {
         return res.status(401).json({ success: false, message: 'Sorry api not working, please try again....!', })
     }
 
-    console.log(result);
-    console.log(req.url);
-
 };
+
+
+
+const callFun = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            // reject('hhhh');
+            resolve();
+        }, 300);
+    })
+}
+
+
+export const sendUserChats = async (req, res) => {
+    if (!req.user) return res.json({ success: false, message: 'Place login to restore image...!' });
+    const userData = await getUserById(req.user._id);
+    if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
+    await callFun();
+    const response = await loadUserChat(req.user._id);
+    if (response)
+        return res.json({ success: true, chatData: response })
+    else
+        return res.json({ success: false, });
+}
+
+
+
+
+export const chatImageDelete = async (req, res) => {
+    await callFun();
+    if (!req.user) return res.json({ success: false, message: 'Place login to delete image...!' });
+    const userData = await getUserById(req.user._id);
+    if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
+    const { imageId } = req.body;
+    if (!imageId) return res.json({ success: false, message: 'Please give imageId to delete...!' });
+    // console.log(imageId);
+    const response = await imageDelete({ imageId, userId: userData._id });
+    if (response)
+        return res.json({ success: true, message: 'Image deleted...!', imageId })
+    else
+        return res.json({ success: false });
+}
+
+export const imgPublicPrivate = async (req, res) => {
+    await callFun();
+    if (!req.user) return res.json({ success: false, message: 'Place login to public or private image...!' });
+    const userData = await getUserById(req.user._id);
+    if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
+    const { imageId } = req.body;
+    if (!imageId) return res.json({ success: false, message: 'Please give imageId to public or private...!' });
+    // console.log(imageId);
+    const response = await imagePublicPrivate({ imageId, userId: userData._id });
+    if (response)
+        return res.json({ success: true, updatedImage: response.updatedImage, })
+    else
+        return res.json({ success: false });
+}
+
+
 
 
 

@@ -22,6 +22,10 @@ const imageSchema = mongoose.Schema(
         isAdminPublic: {
             type: Boolean,
             default: false,
+        },
+        isAdminReject: {
+            type: Boolean,
+            default: false,
         }
     },
     {
