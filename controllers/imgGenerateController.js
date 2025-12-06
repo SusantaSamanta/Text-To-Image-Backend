@@ -1,6 +1,11 @@
 
 import { getUserById } from "../services/authServices.js";
-import { promptWordCountVerify, generateApiCall, decreaseUserCredits, loadUserChat, imageDelete, imagePublicPrivate } from "../services/generateServices.js";
+import {
+    promptWordCountVerify, generateApiCall,
+    decreaseUserCredits, loadUserChat,
+    imageDelete, imagePublicPrivate,
+    fetchCountPublicImages, fetchPublicImages,
+} from "../services/generateServices.js";
 import { v2 as cloudinary } from 'cloudinary';
 import { join } from 'path'
 import { Images } from "../model/imageModel.js";
@@ -40,7 +45,7 @@ export const generateImg = async (req, res) => {
 
 
 
-    const result = await generateApiCall(_id, prompt);
+    const result = await generateApiCall(_id, name, prompt);
     if (result.success) {
         await decreaseUserCredits(_id); // if img generated and save in db successfully then decrease user credits from db | else not 
         return res.status(200).json({ success: true, user: { name, email, isVerified, credits: credits - 1, createdAt, genImagesCount }, newImage: result.newImage })
@@ -57,7 +62,7 @@ const callFun = () => {
         setTimeout(() => {
             // reject('hhhh');
             resolve();
-        }, 300);
+        }, 3000);
     })
 }
 
@@ -107,6 +112,31 @@ export const imgPublicPrivate = async (req, res) => {
         return res.json({ success: false });
 }
 
+
+export const countPublicImages = async (req, res) => {
+    // await callFun();
+    const response = await fetchCountPublicImages();
+    // console.log(response);
+    if (response)
+        return res.json({ success: true, numberOfPublicImages: response.numberOfPublicImages })
+    else
+        return res.json({ success: false });
+}
+
+
+export const sendPublicImages = async (req, res) => {
+    await callFun();
+    // console.log(req.query);
+    const { page, limit } = req.query
+    if (!page || !limit)
+        return res.json({ success: false, message: 'Please give page and limit...!' });
+    const response = await fetchPublicImages(page, limit);
+    // console.log(response);
+    if (response)
+        return res.json({ success: true, publicImages: response.publicImages })
+    else
+        return res.json({ success: false });
+}
 
 
 

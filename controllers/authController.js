@@ -1,13 +1,17 @@
 
+
 import {
-    checkIsUserAlreadyExist,
-    nameVerify,
-    passwordLengthVerify,
-    saveNewUser,
+    nameVerify, passwordLengthVerify,
+    checkIsUserAlreadyExist, isUserVerified,
+    saveNewUser, updateNewUser,
     verifyUserByPW,
     generateJWToken,
     getUserById,
     emailLengthVerify,
+    sendVerificationLink,
+    verifyVerificationToken,
+
+
 } from "../services/authServices.js";
 
 export const postRegister = async (req, res) => {
@@ -17,37 +21,80 @@ export const postRegister = async (req, res) => {
         return res.status(400).json({ success: false, message: 'All required fields must be provided.' });
 
 
-    // if (!nameVerify(name))
-    //     return res.status(422).json({ success: false, message: 'Invalid Usr name. Give at list 4 alphabet' });
+    if (!nameVerify(name))
+        return res.status(422).json({ success: false, message: 'Invalid Usr name. Give at list 4 alphabet' });
 
-    // if (!emailLengthVerify(email)) // change it to 2nd fun after testing or create the app 
-    //     return res.status(422).json({ success: false, message: 'Invalid email format. Please enter a valid email like example@domain.com.' });
+    if (!emailLengthVerify(email))
+        return res.status(422).json({ success: false, message: 'Invalid email format. Please enter a valid email like example@domain.com.' });
 
-    // if (!passwordLengthVerify(password))
-    //     return res.status(422).json({ success: false, message: 'Invalid password. Must be at least 8 characters, include one number and one symbol.' });
+    if (!passwordLengthVerify(password))
+        return res.status(422).json({ success: false, message: 'Invalid password. Must be at least 8 characters, include one number and one symbol.' });
 
-    if (await checkIsUserAlreadyExist(email))
-        return res.status(409).json({ success: false, message: 'A user with this email already exists.' });
+    if (await checkIsUserAlreadyExist(email)) { // if mail exist this email in DB 
+        if (await isUserVerified(email)) {  // if mail exist and mail verified => user exist in this email
+            return res.status(409).json({ success: false, message: 'A user with this email already exists.' });
+        } else { // if mail exist but not mail verified => mean update pw, name with this mail 
+            const newUser = await updateNewUser(name, email, password);
+            const mailResponse = await sendVerificationLink({ _id: newUser._id, email, name: newUser.name });
+            const sendMailStatus = mailResponse ? { success: true, message: "Verification mail sended..!" } : { success: false, message: "Something Wrong we don't send verification Email...!" };
 
-    const newUser = await saveNewUser(name, email, password);
-
-    const token = generateJWToken(newUser)
-    res.cookie("VISION_AUTH_TOKEN", token, { httpOnly: true, secure: false, maxAge: 7 * 60 * 60 * 1000 }); // 7 days 
-
-    return res.status(201).json({
-        success: true,
-        message: 'User registered successfully!',
-        user: {
-            name: newUser.name,
-            email: newUser.email,
-            isVerified: newUser.isVerified,
-            credits: newUser.credits,
-            createdAt: newUser.createdAt,
-            genImagesCount: newUser.genImagesCount,
+            return res.status(201).json({
+                success: true,
+                message: 'Primary registration successfully, now verify your email...!',
+                sendMailStatus,
+                user: {
+                    name: newUser.name,
+                    email: newUser.email,
+                    isVerified: newUser.isVerified,
+                    // credits: newUser.credits,
+                    // createdAt: newUser.createdAt,
+                    // genImagesCount: newUser.genImagesCount,
+                }
+            });
         }
-    });
+    } else { // if user not exist then create new user 
+        const newUser = await saveNewUser(name, email, password);
+        const mailResponse = await sendVerificationLink({ _id: newUser._id, email, name: newUser.name });
+        const sendMailStatus = mailResponse ? { success: true, message: "Verification mail sended..!" } : { success: false, message: "Something Wrong we don't send verification Email...!" };
+
+        return res.status(201).json({
+            success: true,
+            message: 'Primary registration successfully, now verify your email...!',
+            sendMailStatus,
+            user: {
+                name: newUser.name,
+                email: newUser.email,
+                isVerified: newUser.isVerified,
+                // credits: newUser.credits,
+                
+            }
+        });
+    }
 
 };
+
+
+
+
+export const checkVerificationToken = async (req, res) => {
+    console.log(req.query);
+    
+    const { userid, token } = req.query;
+    if (!userid || !token) {
+        return res.redirect("http://localhost:5173/verify-email?status=failed");
+    }
+    const result = await verifyVerificationToken(userid, token)
+    if(result){
+        return res.redirect(`http://localhost:5173/verify-email?status=success&email=${result.email}`);
+    }else{
+        return res.redirect(`http://localhost:5173/verify-email?status=failed`);
+    }
+}
+
+
+
+
+
 
 
 export const postLogin = async (req, res) => {
@@ -55,8 +102,9 @@ export const postLogin = async (req, res) => {
     if (!email || !password)
         return res.status(401).json({ success: false, message: `All required fields must be provided...!` });
 
-    const isUserExist = await checkIsUserAlreadyExist(email);
-    if (!isUserExist)   // user not exist 
+    // const isUserExist = await checkIsUserAlreadyExist(email);
+    const isUserExist = await isUserVerified(email);
+    if (!isUserExist)   // user not exist || not verified
         return res.status(401).json({ success: false, message: `Invalid user or password......!` });
 
     if (!await verifyUserByPW(isUserExist.password, password)) // password not match 

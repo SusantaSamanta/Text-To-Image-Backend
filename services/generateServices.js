@@ -44,9 +44,9 @@ export const decreaseUserCredits = async (_id) => {
 
 
 
-const saveNewImageForUser = async ({ _id, prompt, url }) => {
+const saveNewImageForUser = async ({ _id, userName, prompt, url }) => {
     try {
-        return await Images.create({ generateBy: _id, prompt, imageUrl: url })
+        return await Images.create({ generateBy: _id, userName, prompt, imageUrl: url })
     } catch (error) {
         console.log(error);
     }
@@ -77,49 +77,51 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
 });
 
-export const generateApiCall = async (_id, prompt) => {
+export const generateApiCall = async (_id, userName, prompt) => {
     try {
         await setUserImgProcessingStatus(_id, true);
         await callFun();   /// after api call 
 
-        // console.log(prompt);
 
-        /*
-                const formData = new FormData();
-                formData.append('prompt', prompt);
-        
-                const { data } = await axios.post('https://clipdrop-api.co/text-to-image/v1',
-                    formData, {
-                    headers: {
-                        'x-api-key': process.env.CLIPDROP_KEY,
-                    },
-                    responseType: 'arraybuffer'
-                })
-                console.log(prompt);
-                const baseImage = Buffer.from(data, 'binary').toString('base64');
-                console.log(baseImage);
-                const resultImg = `data:image/png;base64,${baseImage}`;
-                console.log(resultImg);
-                // const resultJpg = `data:image/png;base64,${baseImage}`;
-        
-        
-                try {
-                    const response = await cloudinary.uploader.upload(resultImg, { folder: 'vision_brush' });
-                    console.log(response);
-                    res.json(response);
-                } catch (error) {
-                    console.log('error:::::', error);
-        
-                }
-        
-        
-        
-        
-                */
 
-        const savedImage = await saveNewImageForUser({ _id, prompt, url: '/src/assets/1.jpg' });
+        const formData = new FormData();
+        formData.append('prompt', prompt);
+
+        const { data } = await axios.post('https://clipdrop-api.co/text-to-image/v1',
+            formData, {
+            headers: {
+                'x-api-key': process.env.CLIPDROP_KEY,
+            },
+            responseType: 'arraybuffer'
+        })
+        console.log(prompt);
+        const baseImage = Buffer.from(data, 'binary').toString('base64');
+        // console.log(baseImage);
+        const resultImg = `data:image/png;base64,${baseImage}`;
+        // console.log(resultImg);
+        // const resultJpg = `data:image/png;base64,${baseImage}`;
+
+        let url = '';
+        try {
+            const response = await cloudinary.uploader.upload(resultImg, { folder: 'vision_brush' });
+            // console.log(response);
+            url = response.secure_url;
+            console.log(url);
+            
+        } catch (error) {
+            console.log('error:::::', error);
+
+        }
+
+
+
+
+
+
+        const savedImage = await saveNewImageForUser({ _id, userName, prompt, url });
         const newImage = {
             _id: savedImage._id,
+            userName,
             prompt,
             imageUrl: savedImage.imageUrl,
             isPublic: savedImage.isPublic,
@@ -139,7 +141,7 @@ export const generateApiCall = async (_id, prompt) => {
 
 export const loadUserChat = async (userId) => {
     try {
-        const data = await Images.find({ generateBy: userId }).select('_id prompt imageUrl isPublic createdAt'); // Correct filtering 
+        const data = await Images.find({ generateBy: userId }).select('_id userName prompt imageUrl isPublic createdAt'); // Correct filtering 
         return data;
     } catch (error) {
         // console.error('Error loading user chat:', error);
@@ -169,6 +171,7 @@ export const imagePublicPrivate = async ({ imageId, userId }) => {
         await image.save();
         const updatedImage = {
             _id: image._id,
+            userName: image.userName,
             prompt: image.prompt,
             imageUrl: image.imageUrl,
             isPublic: image.isPublic,
@@ -185,6 +188,38 @@ export const imagePublicPrivate = async ({ imageId, userId }) => {
     }
 };
 
+
+export const fetchCountPublicImages = async () => {
+    try {
+        const images = await Images.countDocuments(); // count all images 
+        // const images = await Images.countDocuments({ isPublic: true });
+        return {
+            success: true,
+            numberOfPublicImages: images
+        };
+    } catch (error) {
+        console.error('Error count public : ', error);
+        return false;
+    }
+};
+
+export const fetchPublicImages = async (page, limit) => {
+    try {
+        const image = await Images
+            .find() // send all images 
+            // .find({ isPublic: true })
+            .select('_id userName prompt imageUrl isPublic createdAt')
+            .skip((page - 1) * limit)
+            .limit(limit);
+        return {
+            success: true,
+            publicImages: image
+        };
+    } catch (error) {
+        console.error('Error toggling image public/private:', error);
+        return false;
+    }
+};
 
 
 

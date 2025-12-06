@@ -4,7 +4,11 @@ const imageSchema = mongoose.Schema(
     {
         generateBy: {
             type: mongoose.Schema.ObjectId,
-            ref: 'User',
+            ref: 'UserTable',
+            require: true,
+        },
+        userName: {
+            type: String,
             require: true,
         },
         prompt: {
