@@ -5,7 +5,7 @@ import cors from 'cors'
 import { authRoutes } from './routes/authRoutes.js';
 
 
-import { connectDataBase } from './config/DB-connection.js';
+import { connectDataBase } from './config/DB-Connection.js';
 import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/authMiddleware.js';
 import { generateRoutes } from './routes/ImageRoutes.js';
