@@ -1,0 +1,21 @@
+# MONGO_URL = 'mongodb://localhost:27017'
+MONGO_URL = '****************************8appName=Cluster-0'
+DB_NAME = 'Vis**************'
+JWT_KEY = 'HHHH******************'
+FRONTEND_URL = http://localhost:5173
+
+CLIPDROP_API_KEY = '**********************************8'
+
+CLIPDROP_KEY = '******************'
+
+
+CLOUD_NAME = '********************'
+API_KEY = '********************'
+API_SECRET = '*************-ZY'
+
+
+GMAIL_FOR_MAIL_SEND = 'cap**************'
+GMAIL_PASS_FOR_SEND_MAIL = 'gzw***********k'
+
+
+

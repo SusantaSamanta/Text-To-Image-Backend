@@ -62,7 +62,7 @@ const callFun = () => {
         setTimeout(() => {
             // reject('hhhh');
             resolve();
-        }, 3000);
+        }, 1000);
     })
 }
 

@@ -14,7 +14,7 @@ import {
 
 } from "../services/authServices.js";
 
-export const postRegister = async (req, res) => {
+export const postRegister = async (req, res) => {  //  post  /api/user/register
 
     const { name, email, password } = req.body;
     if (!name || !email || !password)
