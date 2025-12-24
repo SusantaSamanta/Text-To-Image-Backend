@@ -80,7 +80,7 @@ cloudinary.config({
 export const generateApiCall = async (_id, userName, prompt) => {
     try {
         await setUserImgProcessingStatus(_id, true);
-        await callFun();   /// after api call 
+        // await callFun();   /// after api call 
 
 
 
@@ -101,13 +101,14 @@ export const generateApiCall = async (_id, userName, prompt) => {
         // console.log(resultImg);
         // const resultJpg = `data:image/png;base64,${baseImage}`;
 
+        // let url = '../src/assets/1.jpg';
         let url = '';
         try {
             const response = await cloudinary.uploader.upload(resultImg, { folder: 'vision_brush' });
             // console.log(response);
             url = response.secure_url;
             console.log(url);
-            
+
         } catch (error) {
             console.log('error:::::', error);
 

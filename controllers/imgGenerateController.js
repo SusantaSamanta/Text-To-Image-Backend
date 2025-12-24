@@ -83,7 +83,7 @@ export const sendUserChats = async (req, res) => {
 
 
 export const chatImageDelete = async (req, res) => {
-    await callFun();
+    // await callFun();
     if (!req.user) return res.json({ success: false, message: 'Place login to delete image...!' });
     const userData = await getUserById(req.user._id);
     if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
@@ -98,7 +98,7 @@ export const chatImageDelete = async (req, res) => {
 }
 
 export const imgPublicPrivate = async (req, res) => {
-    await callFun();
+    // await callFun();
     if (!req.user) return res.json({ success: false, message: 'Place login to public or private image...!' });
     const userData = await getUserById(req.user._id);
     if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
@@ -124,12 +124,21 @@ export const countPublicImages = async (req, res) => {
 }
 
 
+
+const waitBeforeSend = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            // reject('hhhh');
+            resolve();
+        }, 5000);
+    })
+}
 export const sendPublicImages = async (req, res) => {
-    await callFun();
     // console.log(req.query);
     const { page, limit } = req.query
     if (!page || !limit)
         return res.json({ success: false, message: 'Please give page and limit...!' });
+    await waitBeforeSend();
     const response = await fetchPublicImages(page, limit);
     // console.log(response);
     if (response)
