@@ -57,15 +57,6 @@ const saveNewImageForUser = async ({ _id, userName, prompt, url }) => {
 
 
 
-const callFun = () => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // reject('hhhh');
-            resolve();
-        }, 5000);
-    })
-}
-
 
 
 
@@ -90,7 +81,7 @@ export const generateApiCall = async (_id, userName, prompt) => {
         const { data } = await axios.post('https://clipdrop-api.co/text-to-image/v1',
             formData, {
             headers: {
-                'x-api-key': process.env.CLIPDROP_KEY,
+                'x-api-key': process.env.CLIPDROP_API_KEY,
             },
             responseType: 'arraybuffer'
         })
@@ -111,12 +102,12 @@ export const generateApiCall = async (_id, userName, prompt) => {
 
         } catch (error) {
             console.log('error:::::', error);
-
+            return { success: false, }
         }
 
 
 
-
+        // console.log(url)
 
 
         const savedImage = await saveNewImageForUser({ _id, userName, prompt, url });

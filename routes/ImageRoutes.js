@@ -4,6 +4,7 @@ const router = Router();
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { generateImg, imgUpload, sendUserChats, chatImageDelete, imgPublicPrivate, countPublicImages, sendPublicImages } from "../controllers/imgGenerateController.js";
 
+import { generateLimiter } from "../middleware/rateLimiter.js";
 
 
 
@@ -12,7 +13,7 @@ import { generateImg, imgUpload, sendUserChats, chatImageDelete, imgPublicPrivat
 
 
 
-router.post('/generate', authMiddleware, generateImg)
+router.post('/generate', generateLimiter, authMiddleware, generateImg)
 router.get('/load-user-chats', authMiddleware, sendUserChats);
 router.post('/image-delete', authMiddleware, chatImageDelete);
 router.post('/public-private', authMiddleware, imgPublicPrivate);

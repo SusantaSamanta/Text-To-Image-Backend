@@ -8,7 +8,7 @@ import {
 } from "../services/generateServices.js";
 import { v2 as cloudinary } from 'cloudinary';
 import { join } from 'path'
-import { Images } from "../model/imageModel.js";
+// import { Images } from "../model/imageModel.js";
 
 
 
@@ -57,21 +57,12 @@ export const generateImg = async (req, res) => {
 
 
 
-const callFun = () => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // reject('hhhh');
-            resolve();
-        }, 1000);
-    })
-}
 
 
 export const sendUserChats = async (req, res) => {
     if (!req.user) return res.json({ success: false, message: 'Place login to restore image...!' });
     const userData = await getUserById(req.user._id);
     if (!userData) return res.json({ success: false, message: 'No User Found, login again....!' });
-    await callFun();
     const response = await loadUserChat(req.user._id);
     if (response)
         return res.json({ success: true, chatData: response })
@@ -173,7 +164,7 @@ export const imgUpload = async (req, res) => {
         res.json(response);
     } catch (error) {
         console.log('error:::::', error);
-
+        
     }
 }
 

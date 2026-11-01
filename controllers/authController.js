@@ -66,7 +66,7 @@ export const postRegister = async (req, res) => {  //  post  /api/user/register
                 email: newUser.email,
                 isVerified: newUser.isVerified,
                 // credits: newUser.credits,
-                
+
             }
         });
     }
@@ -81,17 +81,15 @@ export const checkVerificationToken = async (req, res) => {
     
     const { userid, token } = req.query;
     if (!userid || !token) {
-        return res.redirect("http://localhost:5173/verify-email?status=failed");
+        return res.redirect(`${process.env.FRONTEND_URL}/verify-email?status=failed`);
     }
     const result = await verifyVerificationToken(userid, token)
-    if(result){
-        return res.redirect(`http://localhost:5173/verify-email?status=success&email=${result.email}`);
-    }else{
-        return res.redirect(`http://localhost:5173/verify-email?status=failed`);
+    if (result) {
+        return res.redirect(`${process.env.FRONTEND_URL}/verify-email?status=success&email=${result.email}`);
+    } else {
+        return res.redirect(`${process.env.FRONTEND_URL}/verify-email?status=failed`);
     }
 }
-
-
 
 
 
@@ -101,11 +99,11 @@ export const postLogin = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password)
         return res.status(401).json({ success: false, message: `All required fields must be provided...!` });
-
     // const isUserExist = await checkIsUserAlreadyExist(email);
     const isUserExist = await isUserVerified(email);
     if (!isUserExist)   // user not exist || not verified
         return res.status(401).json({ success: false, message: `Invalid user or password......!` });
+
 
     if (!await verifyUserByPW(isUserExist.password, password)) // password not match 
         return res.status(401).json({ success: false, message: `Invalid user or password......!` });

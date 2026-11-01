@@ -5,6 +5,7 @@ import crypto from "crypto";
 import 'dotenv/config'
 import { sendVerificationMail } from "../lib/nodeMailer.js";
 import { VerifyEmailTable } from "../model/vefifyEmailSchema.js";
+import { sendEmail } from "../lib/sendMailer.js";
 
 
 
@@ -144,12 +145,11 @@ export const sendVerificationLink = async ({ _id, email, name }) => {
     try {
         await VerifyEmailTable.deleteOne({ user: _id }); // delete previous token 
         await VerifyEmailTable.create({ user: _id, token });
-        const verificationLink = `http://localhost:3000/api/user/register/verify-email?userid=${_id}&token=${token}`;
-        return sendVerificationMail({
-            to: email,
-            subject: 'Verify your email',
-            html: `
-            <!DOCTYPE html>
+        const verificationLink = `${process.env.API_BASE_URL}/api/user/register/verify-email?userid=${_id}&token=${token}`;
+        return sendEmail(
+            email,
+            'Verify your email',
+            `<!DOCTYPE html>
             <html>
             
                     <head>
@@ -204,7 +204,67 @@ export const sendVerificationLink = async ({ _id, email, name }) => {
                               
                     </html>
                 `
-        });
+        );
+        // return sendVerificationMail({
+        //     to: email,
+        //     subject: 'Verify your email',
+        //     html: `
+        //     <!DOCTYPE html>
+        //     <html>
+
+        //             <head>
+        //             <meta charset="UTF-8" />
+        //             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        //             <title>Email Verification</title>
+        //             </head>
+
+        //             <body
+        //             style="margin:0; padding:0; background: linear-gradient(135deg, #f5f7fa, #e4ecf7); font-family: 'Segoe UI', Tahoma, sans-serif;">
+        //               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        //               <tr>
+        //               <td align="center" style="padding: 20px;">
+        //               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+        //               style="max-width: 600px; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.06);">
+        //                       <tr>
+        //                       <td style="background: linear-gradient(90deg, #155dfc, #4facfe); text-align: center;">
+        //                       <h1 style="color: #ffffff; font-size: 24px;">Email Verification</h1>
+        //                       </td>
+        //                       </tr>
+        //                       <tr>
+        //                       <td style="padding: 30px;">
+        //                       <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">Welcome to Vision Brush</h1>
+        //                       <p style="color: #555; font-size: 16px; line-height: 1.6;">
+        //                             Hi <strong>${name}</strong> (<span style="color: #155dfc;">${email}</span>),<br>
+        //                             Thank you for joining <span style="color: #ff7f50; font-weight: bold;">Vision Brush</span>!
+        //                             Please confirm your email address to unlock all the creative possibilities we offer.
+        //                             </p>
+        //                           <div style="text-align: center; margin: 30px 0;">
+        //                           <a href="${verificationLink}"
+        //                               style="background: linear-gradient(90deg, #2d88ff, #4facfe); color: #fff; padding: 14px 30px; border-radius: 30px; font-size: 16px; text-decoration: none; font-weight: bold; display: inline-block;">
+        //                               Verify Your Email
+        //                               </a>
+        //                               </div>
+        //                               <p style="color: #777; font-size: 14px; line-height: 1.5;">
+        //                               This link will expire in <strong>24 hours</strong>. If you didn’t sign up for VisionBrush, please
+        //                               ignore this email.
+        //                           </p>
+        //                         </td>
+        //                         </tr>
+        //                         <tr>
+        //                         <td style="background: #f8f8f8; padding: 20px; text-align: center; color: #999; font-size: 12px;">
+        //                         &copy; 2025 VisionBrush. All rights reserved.<br>
+        //                         Bringing colors to your imagination.
+        //                         </td>
+        //                       </tr>
+        //                       </table>
+        //                       </td>
+        //                       </tr>
+        //                       </table>
+        //                       </body>
+
+        //             </html>
+        //         `
+        // });
     } catch (error) {
         console.log(error);
         return false;
@@ -217,7 +277,7 @@ export const sendVerificationLink = async ({ _id, email, name }) => {
 
 
 export const verifyVerificationToken = async (userid, userToken) => {
-    
+
     try {
         const userExist = await User.findOne({ _id: userid })
         if (!userExist) {
@@ -229,8 +289,8 @@ export const verifyVerificationToken = async (userid, userToken) => {
             if (userToken === token && new Date() < expireAt) {
                 await User.updateOne({ _id: userExist._id }, { isVerified: true });  // if token match then for this user isVerified = true 
                 await VerifyEmailTable.deleteOne({ user: userExist._id });
-                return {email: userExist.email};
-            }else{
+                return { email: userExist.email };
+            } else {
                 return false;
             }
         } else {
@@ -239,7 +299,7 @@ export const verifyVerificationToken = async (userid, userToken) => {
     } catch (error) {
         console.log(error);
         return false;
-        
+
     }
 }
 

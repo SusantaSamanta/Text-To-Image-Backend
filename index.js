@@ -3,11 +3,9 @@ const app = express();
 import 'dotenv/config';
 import cors from 'cors'
 import { authRoutes } from './routes/authRoutes.js';
-
-
+import { globalLimiter } from './middleware/rateLimiter.js';
 import { connectDataBase } from './config/DB-Connection.js';
 import cookieParser from 'cookie-parser';
-import { authMiddleware } from './middleware/authMiddleware.js';
 import { generateRoutes } from './routes/ImageRoutes.js';
 connectDataBase();
 
@@ -25,9 +23,20 @@ app.use(cors(
 ));  // use for connect frontend and backend
 app.use(cookieParser()); ///  use for set and get cookies from backend 
 
-app.get('/', (req, res) => {
-    console.log('home', req.url);
-    res.send('Server running');
+
+
+app.use(globalLimiter);
+
+
+// async function wait() {
+//   return new Promise((resolve) => {
+//     setTimeout(resolve, 6000);
+//   });
+// }
+app.get('/', async (req, res) => {
+    // console.log('home', req.url);
+    // await wait();
+    return res.status(200).json({ success: true, stats: "Server running...." });
 });
 
 
