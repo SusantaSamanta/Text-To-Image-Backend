@@ -77,7 +77,7 @@ export const postRegister = async (req, res) => {  //  post  /api/user/register
 
 
 export const checkVerificationToken = async (req, res) => {
-    console.log(req.query);
+    // console.log(req.query);
     
     const { userid, token } = req.query;
     if (!userid || !token) {
