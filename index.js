@@ -1,5 +1,4 @@
 import express from 'express';
-const app = express();
 import 'dotenv/config';
 import cors from 'cors'
 import { authRoutes } from './routes/authRoutes.js';
@@ -9,7 +8,8 @@ import cookieParser from 'cookie-parser';
 import { generateRoutes } from './routes/ImageRoutes.js';
 connectDataBase();
 
-
+const app = express();
+app.set('trust proxy', 1); // 1 = number of proxies between user and server
 
 // app.use(express.urlencoded()); // it use to hide data in url bar 
 app.use(express.json());  // it mandatory to receive data from body 
@@ -37,6 +37,10 @@ app.get('/', async (req, res) => {
     // console.log('home', req.url);
     // await wait();
     return res.status(200).json({ success: true, stats: "Server running...." });
+});
+
+app.get('/ip', (req, res) => {
+    res.json({ ip: req.ip });
 });
 
 
