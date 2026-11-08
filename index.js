@@ -15,7 +15,7 @@ app.set('trust proxy', 1); // 1 = number of proxies between user and server
 app.use(express.json());  // it mandatory to receive data from body 
 app.use(cors(
     {
-        origin: process.env.FRONTEND_URL,
+        origin: process.env.FRONTEND_URL || 'https://text-to-image-frontend-b7ah.onrender.com',
         exposedHeaders: ['X-Total-Count'],
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         credentials: true,

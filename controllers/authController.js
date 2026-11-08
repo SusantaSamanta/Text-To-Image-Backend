@@ -78,7 +78,7 @@ export const postRegister = async (req, res) => {  //  post  /api/user/register
 
 export const checkVerificationToken = async (req, res) => {
     // console.log(req.query);
-    
+
     const { userid, token } = req.query;
     if (!userid || !token) {
         return res.redirect(`${process.env.FRONTEND_URL}/verify-email?status=failed`);
@@ -109,7 +109,13 @@ export const postLogin = async (req, res) => {
         return res.status(401).json({ success: false, message: `Invalid user or password......!` });
 
     const token = generateJWToken(isUserExist)
-    res.cookie("VISION_AUTH_TOKEN", token, { httpOnly: true, secure: false, maxAge: 7 * 60 * 60 * 1000 });
+    res.cookie("VISION_AUTH_TOKEN", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 7 * 60 * 60 * 1000,
+    });
 
 
     res.json({
@@ -167,8 +173,9 @@ export const userLogout = async (req, res) => {
 
         res.clearCookie("VISION_AUTH_TOKEN", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: true,
+            sameSite: "none",
+            path: "/",
         });
 
         return res.json({

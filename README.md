@@ -32,6 +32,10 @@ https://text-to-image-backend-x154.onrender.com
 
 Base URL: `https://text-to-image-backend-x154.onrender.com`
 
+## Frontend Live Link
+
+Base URL: `https://text-to-image-frontend-b7ah.onrender.com`
+
 ### Auth (`/api/user`)
 
 | Method | Endpoint | Description |
